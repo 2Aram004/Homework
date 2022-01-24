@@ -9,7 +9,7 @@ class Stack
         ~Stack() { delete [] buffer; }
     
     public:
-        void push(T);
+        void push(const T&);
         void pop();
         T& top();
         int Size();
@@ -21,7 +21,7 @@ class Stack
 };
 
 template <typename T>
-void Stack<T>::push(T data)
+void Stack<T>::push(const T& data)
 {
     if(size % 2 == 0)
     {
