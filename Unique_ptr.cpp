@@ -1,27 +1,23 @@
 #include <iostream>
+ 
+namespace Utility
+{
+struct Default {
+Default() = delete;
+ };
 
-struct Default {};
-struct Array {};
+struct Array {
+Array() = delete;
+ };
 
-template <typename T, class K = Default>
+};
+
+template <typename T, class K = Utility::Default>
 class SmartPointer
 {
 public:
 SmartPointer() {}
-~SmartPointer()
- {
-if(ptr_ != nullptr)
-{
-tmp = typeid(K).name();
-
- if(tmp == "7Default") {
- delete ptr_; }
- 
-else  delete [] ptr_;
-
-}
-}
-
+~SmartPointer();
 SmartPointer(T* ptr) : ptr_(ptr) {}
 SmartPointer(const SmartPointer&) = delete;
 SmartPointer& operator=(const SmartPointer&) = delete;
@@ -30,13 +26,16 @@ SmartPointer& operator=(SmartPointer&&);
 
 public:
 T& operator*() {return *ptr_;}
-friend std::ostream& operator<<(std::ostream& os, const SmartPointer& obj) // otherwise it would be cast to bool
-{
-std::cout << obj.ptr_;
-return os;
-}
+friend std::ostream& operator<<(std::ostream& os, const SmartPointer& obj); // otherwise it would be cast to bool
+
 operator bool() {return (ptr_ != nullptr);}
 T* operator->() {return this -> ptr_;}
+T& operator[](const int index) const {return this -> ptr_[index];}
+void reset();
+void Swap(SmartPointer&);
+T* get() {return this -> ptr_;}
+void release() { this -> ptr_ = nullptr; }
+
 
 private:
 T* ptr_ {};
@@ -46,8 +45,10 @@ std::string tmp {};
 template <typename T, typename K>
 SmartPointer<T, K>::SmartPointer(SmartPointer&& obj)
 {
-	obj.ptr_ = this -> ptr_;
-	this -> ptr_ = nullptr;
+	this -> ptr_ = obj.ptr_;
+	this -> tmp =  obj.tmp;
+	obj.ptr_ = nullptr;
+	obj.tmp = {};
 }
 
 template <typename T, typename K>
@@ -58,16 +59,56 @@ SmartPointer<T, K>& SmartPointer<T, K>::operator=(SmartPointer&& rhs)
  			return *this;
 		}
 	else {
-		delete this -> ptr_;
-
+		if(this -> ptr_) {
+		delete this -> ptr_; 
+	}	
 		this -> ptr_ = rhs.ptr_;
+		this -> tmp = rhs.tmp;
 		rhs.ptr_ = nullptr;
-	     }
-	return *this;
+		tmp = {};
+	     
+	return *this; 
+ }
+}
+
+template <typename T, class K>
+std::ostream& operator<<(std::ostream& os, const SmartPointer<T, K>& obj)
+{
+std::cout << obj.ptr_;
+return os;
 }
 
 
+template <typename T, class K>
+SmartPointer<T, K>::~SmartPointer()
+ {
+if(ptr_ != nullptr)
+{
+tmp = typeid(K).name();
+
+ if(tmp == "7Default") {
+ delete ptr_; }
+ 
+else  delete [] ptr_;
+}
+}
+
+template <typename T, class K>
+void SmartPointer<T, K>::Swap(SmartPointer& rhs)
+{
+SmartPointer<T, K> tmp(std::move(rhs));
+rhs = std::move(*this);
+*this = std::move(tmp);
+}
+
+template <typename T, class K>
+void SmartPointer<T, K>::reset()
+{
+delete this -> ptr_; 
+this -> ptr_ = nullptr;
+}
+
 int main()
 {
-SmartPointer<int, Array> sm(new int[5]);
+SmartPointer<int, Utility::Array> Sm(new int[2]);
 }
