@@ -74,7 +74,7 @@ SmartPointer<T, K>& SmartPointer<T, K>::operator=(SmartPointer&& rhs)
 template <typename T, class K>
 std::ostream& operator<<(std::ostream& os, const SmartPointer<T, K>& obj)
 {
-std::cout << obj.ptr_;
+os << obj.ptr_;
 return os;
 }
 
